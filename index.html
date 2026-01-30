@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevStudio | Professional Code Editor</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CodeMirror 5 (Stable/Easy to bundle without build step) Resources -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/material-darker.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Notifications Container -->
+    <div id="toast-container"></div>
+
+    <!-- Authentication View -->
+    <div id="auth-view" class="view-container active">
+        <div class="auth-background">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+        
+        <div class="auth-card glass-panel">
+            <div class="auth-header">
+                <div class="logo">
+                    <i class="fa-solid fa-code"></i>
+                    <span>DevStudio</span>
+                </div>
+                <h2>Welcome Back</h2>
+                <p>Sign in to continue your coding journey</p>
+            </div>
+
+            <form id="auth-form">
+                <div class="input-group">
+                    <i class="fa-regular fa-user"></i>
+                    <input type="text" id="username" placeholder="Username" required autocomplete="username">
+                </div>
+                
+                <div class="input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="password" placeholder="Password" required autocomplete="current-password">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-block" id="auth-submit-btn">
+                        <span>Login</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+
+            <div class="auth-footer">
+                <p id="auth-switch-text">Don't have an account? <a href="#" id="auth-switch-btn">Create one</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Editor View -->
+    <div id="editor-view" class="view-container hidden">
+        
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-small">
+                <i class="fa-solid fa-code"></i>
+            </div>
+            
+            <nav class="nav-menu">
+                <button class="nav-btn active" title="Editor" data-target="editor"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button class="nav-btn" title="Settings" id="settings-btn"><i class="fa-solid fa-gear"></i></button>
+            </nav>
+
+            <div class="user-profile">
+                <div class="avatar" id="user-avatar">U</div>
+                <div class="dropdown-menu">
+                    <div class="dropdown-header">
+                        <span id="display-username">User</span>
+                    </div>
+                    <button id="logout-btn" class="dropdown-item danger">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="workspace">
+            <!-- Top Bar -->
+            <header class="toolbar">
+                <div class="file-info">
+                    <span class="file-icon"><i class="fa-regular fa-file-code"></i></span>
+                    <span class="file-name">untitled</span>
+                    <span class="unsaved-indicator" id="unsaved-dot"></span>
+                </div>
+
+                <div class="tools-center">
+                    <div class="select-wrapper">
+                        <select id="language-select">
+                            <option value="htmlmixed">HTML5</option>
+                            <option value="css">CSS3</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="python">Python 3</option>
+                            <option value="java">Java</option>
+                            <option value="clike">C++</option>
+                        </select>
+                    </div>
+                    <button id="run-btn" class="btn btn-success btn-sm">
+                        <i class="fa-solid fa-play"></i> Run Code
+                    </button>
+                </div>
+
+                <div class="tools-right">
+                    <button class="icon-btn" id="layout-toggle" title="Toggle Layout"><i class="fa-solid fa-table-columns"></i></button>
+                </div>
+            </header>
+
+            <!-- Split Pane -->
+            <div class="split-container">
+                <!-- Editor Pane -->
+                <div class="pane editor-pane" id="editor-container">
+                    <!-- CodeMirror will attach here -->
+                </div>
+
+                <!-- Resizer -->
+                <div class="resizer" id="drag-handle"></div>
+
+                <!-- Preview Pane -->
+                <div class="pane preview-pane">
+                    <div class="preview-header">
+                        <span><i class="fa-solid fa-desktop"></i> Output</span>
+                        <div class="preview-actions">
+                            <button class="icon-btn-sm" id="clear-console-btn" style="display:none;"><i class="fa-solid fa-trash"></i></button>
+                            <button class="icon-btn-sm" id="refresh-preview-btn"><i class="fa-solid fa-rotate-right"></i></button>
+                        </div>
+                    </div>
+                    
+                    <!-- Web Preview -->
+                    <iframe id="web-preview-frame" sandbox="allow-scripts allow-modals"></iframe>
+                    
+                    <!-- Console/Terminal Output (for non-web langs) -->
+                    <div id="console-output" class="hidden">
+                        <div class="console-line system">Waiting for execution...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay hidden" id="settings-modal">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h3>Settings</h3>
+                <button class="close-btn" id="close-settings"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label>Compiler API Key (RapidAPI / Judge0)</label>
+                    <p class="setting-desc">Required to run Python, Java, C++. Leave empty to simulate.</p>
+                    <input type="password" id="api-key-input" placeholder="Paste your API key here">
+                    <a href="https://rapidapi.com/judge0-official/api/judge0-ce" target="_blank" class="help-link">Get a free key <i class="fa-solid fa-external-link-alt"></i></a>
+                </div>
+                <div class="setting-group">
+                    <label>Editor Theme</label>
+                    <select id="theme-select">
+                        <option value="dracula">Dracula</option>
+                        <option value="material-darker">Material Darker</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="save-settings-btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- CodeMirror Core -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    
+    <!-- CodeMirror Modes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
+    
+    <!-- CodeMirror Addons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
+
+    <!-- App Logic -->
+    <script src="js/auth.js"></script>
+    <script src="js/preview.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
